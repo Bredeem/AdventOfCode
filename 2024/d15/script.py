@@ -1,6 +1,6 @@
 
-# INPUT_FILE = "input.txt"
-INPUT_FILE = "test_input.txt"
+INPUT_FILE = "input.txt"
+# INPUT_FILE = "test_input.txt"
 # INPUT_FILE = "small_test_input.txt"
 # INPUT_FILE = "other_test_input.txt"
 
@@ -130,23 +130,26 @@ def move_big(warehouse: list[list[str]], cur_pos: tuple[int, int], direction: st
     elif direction == "^":
         boxes_to_move = set()
         cols_to_check = set([j])
-        while not any([warehouse[i][col] == "#" for col in cols_to_check]):
+        if warehouse[i-1][j] == "#":
+            return cur_pos
+        while not any([warehouse[box[0]-1][box[1]] == "#" for box in boxes_to_move]):
             i -= 1
             new_cols = set()
             for col in cols_to_check:
                 if warehouse[i][col] == "[":
-                    new_cols.add(col+1)
+                    new_cols.update([col, col+1])
                     boxes_to_move.update([(i, col), (i, col+1)])
                 elif warehouse[i][col] == "]":
-                    new_cols.add(col-1)
+                    new_cols.update([col, col-1])
                     boxes_to_move.update([(i, col), (i, col-1)])
-            cols_to_check.update(new_cols)
+            if new_cols:
+                cols_to_check = new_cols
             if all([warehouse[i][col] == "." for col in cols_to_check]):
                 for i in range(i, cur_pos[0]):
-                    for col in cols_to_check:
-                        if (i, col) in boxes_to_move:
-                            warehouse[i-1][col] = warehouse[i][col]
-                            warehouse[i][col] = "."
+                    for box in boxes_to_move:
+                        if box[0] == i:
+                            warehouse[i-1][box[1]] = warehouse[i][box[1]]
+                            warehouse[i][box[1]] = "."
                 warehouse[cur_pos[0]][cur_pos[1]] = "."
                 warehouse[i][j] = "@"
                 return (i, j)
@@ -154,28 +157,42 @@ def move_big(warehouse: list[list[str]], cur_pos: tuple[int, int], direction: st
     else:
         boxes_to_move = set()
         cols_to_check = set([j])
-        while not any([warehouse[i][col] == "#" for col in cols_to_check]):
+        if warehouse[i+1][j] == "#":
+            return cur_pos
+        while not any([warehouse[box[0]+1][box[1]] == "#" for box in boxes_to_move]):
             i += 1
             new_cols = set()
             for col in cols_to_check:
                 if warehouse[i][col] == "[":
-                    new_cols.add(col+1)
+                    new_cols.update([col, col+1])
                     boxes_to_move.update([(i, col), (i, col+1)])
                 elif warehouse[i][col] == "]":
-                    new_cols.add(col-1)
+                    new_cols.update([col, col-1])
                     boxes_to_move.update([(i, col), (i, col-1)])
-            cols_to_check.update(new_cols)
+            if new_cols:
+                cols_to_check = new_cols
             if all([warehouse[i][col] == "." for col in cols_to_check]):
                 for i in range(i, cur_pos[0], -1):
-                    for col in cols_to_check:
-                        if (i, col) in boxes_to_move:
-                            warehouse[i+1][col] = warehouse[i][col]
-                            warehouse[i][col] = "."
+                    for box in boxes_to_move:
+                        if box[0] == i:
+                            warehouse[i+1][box[1]] = warehouse[i][box[1]]
+                            warehouse[i][box[1]] = "."
                 warehouse[cur_pos[0]][cur_pos[1]] = "."
                 warehouse[i][j] = "@"
                 return (i, j)
         return cur_pos
 
+def print_around_pos(warehouse: list[list[str]], cur_pos: tuple[int, int], size: int = 20):
+    i, j = cur_pos
+    half_size = size // 2
+
+    for x in range(i - half_size, i + half_size + 1):
+        for y in range(j - half_size, j + half_size + 1):
+            if 0 <= x < len(warehouse) and 0 <= y < len(warehouse[0]):
+                print(warehouse[x][y], end="")
+            else:
+                print(" ", end="")
+        print()
 
 def part2(warehouse: list[list[str]], directions: str):
     warehouse = double_warehouse(warehouse)
@@ -185,11 +202,13 @@ def part2(warehouse: list[list[str]], directions: str):
 
     cur_pos = find_start(warehouse)
 
-    for direction in directions:
+    for i, direction in enumerate(directions):
         cur_pos = move_big(warehouse, cur_pos, direction)
-        # print(f"Move {direction}:")
-        # for line in warehouse:
-        #     print("".join(line))
+
+        # print("\033c", end="")
+        # print(f"Move: {i} of {len(directions)}", direction)
+        # print_around_pos(warehouse, cur_pos)
+        # input()
         # print()
 
     for line in warehouse:
