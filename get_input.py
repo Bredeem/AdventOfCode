@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 import argparse
 import shutil
-import subprocess
 from pathlib import Path
 
 import requests
 
-SESSION = Path("session").read_text()
+SESSION = Path("session").read_text().strip()
 
 parser = argparse.ArgumentParser(description="Read input")
 parser.add_argument("day", type=str)
