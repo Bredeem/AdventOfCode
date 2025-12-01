@@ -1,19 +1,20 @@
 #!/usr/bin/python3
 import argparse
+import shutil
 import subprocess
 from pathlib import Path
-import shutil
+
 import requests
 
 SESSION = Path("session").read_text()
 
-parser = argparse.ArgumentParser(description='Read input')
-parser.add_argument('day', type=str)
-parser.add_argument('--year', '-y', type=str, default='2024')
+parser = argparse.ArgumentParser(description="Read input")
+parser.add_argument("day", type=str)
+parser.add_argument("--year", "-y", type=str, default="2025")
 args = parser.parse_args()
 
 path = Path(f"{args.year}/d{args.day.zfill(2)}/")
-url = f'https://adventofcode.com/{args.year}/day/{args.day}/input'
+url = f"https://adventofcode.com/{args.year}/day/{args.day}/input"
 
 res = requests.get(url, cookies={"session": SESSION})
 
